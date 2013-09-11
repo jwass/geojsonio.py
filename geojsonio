@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import webbrowser
+
+import geojsonio
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Quickly visualize GeoJSON data on geojson.io')
+
+    parser.add_argument('-p', '--print',
+        dest='do_print',
+        action='store_true',
+        help='print the URL')
+
+    parser.add_argument('-d', '--domain',
+        dest='domain',
+        default='http://geojson.io',
+        help='Alternate URL instead of http://geojson.io/')
+
+    parser.add_argument('filename',
+        nargs='?',
+        type=argparse.FileType('r'),
+        default=sys.stdin,
+        help="The file to send to geojson.io")
+
+    args = parser.parse_args()
+
+    contents = args.filename.read()
+    url = geojsonio.geojsonio_url(contents, args.domain)
+    if args.do_print:
+        print(url)
+    else:
+        webbrowser.open(url)
+
+if __name__ == '__main__':
+    main()
