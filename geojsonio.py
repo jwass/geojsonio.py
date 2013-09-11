@@ -5,7 +5,7 @@ import github3
 
 MAX_URL_LEN = 150e3  # Size threshold above which a gist is created
 
-def to_geojsonio(contents, domain):
+def to_geojsonio(contents, domain='http://geojson.io/'):
     url = geojsonio_url(contents, domain)
     webbrowser.open(url)
 
