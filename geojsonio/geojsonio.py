@@ -10,9 +10,12 @@ import github3
 
 MAX_URL_LEN = 150e3  # Size threshold above which a gist is created
 
-def to_geojsonio(contents, domain='http://geojson.io/'):
+def display(contents, domain='http://geojson.io/'):
     url = geojsonio_url(contents, domain)
     webbrowser.open(url)
+    return url
+# display() used to be called to_geojsonio. Keep it around for now...
+to_geojsonio = display
 
 def geojsonio_url(contents, domain='http://geojson.io/'):
     """
