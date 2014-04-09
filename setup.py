@@ -18,7 +18,6 @@ setup(
     author_email='jwasserman@gmail.com',
     packages=packages,
     package_data={'': ['LICENSE',]},
-    package_dir={'geojsonio': 'geojsonio'},
     include_package_data=True,
     license='BSD',
     zip_safe=False,
