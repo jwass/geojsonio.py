@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import argparse
+import json
 import sys
 import urllib
 import webbrowser
@@ -21,9 +22,22 @@ def geojsonio_url(contents, domain='http://geojson.io/'):
     """
     Returns the URL to open given the domain and contents
 
+    The input contents may be:
+    * string - assumed to be GeoJSON
+    * an object that implements __geo_interface__
+        A FeatureCollection will be constructed with one feature,
+        the object.
+    * a sequence of objects that each implement __geo_interface__
+        A FeatureCollection will be constructed with the objects
+        as the features
+
+    For more information about __geo_interface__ see:
+    https://gist.github.com/sgillies/2217756
+
     If the contents are large, then a gist will be created.
 
     """
+    contents = _parse_contents(contents)
     if len(contents) <= MAX_URL_LEN:
         url = _data_url(domain, contents)
     else:
@@ -31,6 +45,54 @@ def geojsonio_url(contents, domain='http://geojson.io/'):
         url = _gist_url(domain, gist.id)
 
     return url
+
+def _parse_contents(contents):
+    """
+    Return a GeoJSON string from a variety of inputs.
+    See the documentation for geojsonio_url for the possible contents
+    input.
+
+    Returns
+    -------
+    GeoJSON string
+
+    """
+    if isinstance(contents, basestring):
+        return contents
+
+    if hasattr(contents, '__geo_interface__'):
+        features = [_geo_to_feature(contents)]
+    else:
+        try:
+            feature_iter = iter(contents)
+        except TypeError, e:
+            raise ValueError('Unknown type for input')
+
+        features = []
+        for i, f in enumerate(feature_iter):
+            if not hasattr(f, '__geo_interface__'):
+                raise ValueError('Unknown type at index {}'.format(i))
+            features.append(_geo_to_feature(f))
+
+    data= {'type': 'FeatureCollection', 'features': features}
+    return json.dumps(data)
+
+def _geo_to_feature(ob):
+    """
+    Return a GeoJSON Feature from an object that implements
+    __geo_interface__
+
+    If the object's type is a geometry, return a Feature with empty
+    properties and the object's mapping as the feature geometry. If the
+    object's type is a Feature, then return it.
+
+    """
+    mapping = ob.__geo_interface__
+    if mapping['type'] == 'Feature':
+        return mapping
+    else:
+        return {'type': 'Feature',
+                'geometry': mapping}
 
 def _create_gist(contents, description='', filename='data.geojson'):
     """
