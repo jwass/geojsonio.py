@@ -1,1 +1,1 @@
-from geojsonio import main, to_geojsonio, display
+from geojsonio import main, to_geojsonio, display, embed

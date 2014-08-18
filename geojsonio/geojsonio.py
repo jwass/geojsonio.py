@@ -20,6 +20,25 @@ def display(contents, domain='http://geojson.io/', force_gist=False):
 to_geojsonio = display
 
 
+def embed(contents='', width='100%', height=512, *args, **kwargs):
+    """
+    Embed geojson.io in an iframe in Jupyter/IPython notebook. 
+
+    Parameters
+    ----------
+    contents - see geojsonio_url()
+    width - string, default '100%' - width of the iframe
+    height - string / int, default 512 - height of the iframe
+
+    """
+    from IPython.display import HTML
+    
+    url = geojsonio_url(contents, *args, **kwargs)
+    html = '<iframe src={url} width={width} height={height}></iframe>'.format(
+            url=url, width=width, height=height)
+    return HTML(html)
+
+
 def geojsonio_url(contents, domain='http://geojson.io/', force_gist=False):
     """
     Returns the URL to open given the domain and contents
