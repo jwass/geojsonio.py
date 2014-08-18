@@ -13,6 +13,10 @@ Send data to geojson.io and open a browser within python
         
     display(contents)
     
+To easily embed geojson.io in an iframe in a Jupyter/IPython notebook, use
+the `embed()` method
+
+    embed(contents)
 
 It can also be used on the command line. Read or pipe a file
 
