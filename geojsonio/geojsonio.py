@@ -10,10 +10,10 @@ import webbrowser
 import github3
 
 MAX_URL_LEN = 150e3  # Size threshold above which a gist is created
+DEFAULT_DOMAIN = 'http://geojson.io/'
 
-
-def display(contents, domain='http://geojson.io/', force_gist=False):
-    url = geojsonio_url(contents, domain, force_gist)
+def display(contents, domain=DEFAULT_DOMAIN, force_gist=False):
+    url = make_url(contents, domain, force_gist)
     webbrowser.open(url)
     return url
 # display() used to be called to_geojsonio. Keep it around for now...
@@ -26,20 +26,20 @@ def embed(contents='', width='100%', height=512, *args, **kwargs):
 
     Parameters
     ----------
-    contents - see geojsonio_url()
+    contents - see make_url()
     width - string, default '100%' - width of the iframe
     height - string / int, default 512 - height of the iframe
 
     """
     from IPython.display import HTML
     
-    url = geojsonio_url(contents, *args, **kwargs)
+    url = make_url(contents, *args, **kwargs)
     html = '<iframe src={url} width={width} height={height}></iframe>'.format(
             url=url, width=width, height=height)
     return HTML(html)
 
 
-def geojsonio_url(contents, domain='http://geojson.io/', force_gist=False):
+def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False):
     """
     Returns the URL to open given the domain and contents
 
@@ -58,20 +58,17 @@ def geojsonio_url(contents, domain='http://geojson.io/', force_gist=False):
     If the contents are large, then a gist will be created.
 
     """
-    contents = _parse_contents(contents)
-    if len(contents) <= MAX_URL_LEN and not force_gist:
-        url = _data_url(domain, contents)
-    else:
-        gist = _create_gist(contents)
-        url = _gist_url(domain, gist.id)
+    contents = parse_contents(contents)
+    factory = get_url_factory(contents, force_gist, size_for_gist=MAX_URL_LEN)
+    url = factory(contents, domain)
 
     return url
 
 
-def _parse_contents(contents):
+def parse_contents(contents):
     """
     Return a GeoJSON string from a variety of inputs.
-    See the documentation for geojsonio_url for the possible contents
+    See the documentation for make_url for the possible contents
     input.
 
     Returns
@@ -118,7 +115,36 @@ def _geo_to_feature(ob):
                 'geometry': mapping}
 
 
-def _create_gist(contents, description='', filename='data.geojson'):
+def get_url_factory(contents, force_gist=False, size_for_gist=MAX_URL_LEN):
+    """
+    Return a function that will generate the geojson.io URL
+
+    Factory functions take the domain and contents and return the appropriate
+    URL that geojson.io knows how to handle. The automatic switching logic to
+    choose which factory is used belongs here.
+
+    """
+    if len(contents) <= size_for_gist and not force_gist:
+        func = get_data_url
+    else:
+        func = make_gist_and_url
+
+    return func
+
+
+def get_data_url(contents, domain=DEFAULT_DOMAIN):
+    url = (domain + '#data=data:application/json,' +
+           urllib.quote(contents))
+    return url
+
+
+def make_gist_and_url(contents, domain=DEFAULT_DOMAIN):
+    gist = make_gist(contents)
+    url = get_gist_url(gist.id, domain)
+    return url
+
+
+def make_gist(contents, description='', filename='data.geojson'):
     """
     Create and return an anonymous gist with a single file and specified
     contents
@@ -131,13 +157,7 @@ def _create_gist(contents, description='', filename='data.geojson'):
     return gist
 
 
-def _data_url(domain, contents):
-    url = (domain + '#data=data:application/json,' +
-           urllib.quote(contents))
-    return url
-
-
-def _gist_url(domain, gist_id):
+def get_gist_url(gist_id, domain=DEFAULT_DOMAIN):
     url = (domain + '#id=gist:/{}'.format(gist_id))
     return url
 
@@ -153,7 +173,7 @@ def main():
 
     parser.add_argument('-d', '--domain',
                         dest='domain',
-                        default='http://geojson.io',
+                        default=DEFAULT_DOMAIN,
                         help='Alternate URL instead of http://geojson.io/')
 
     parser.add_argument('filename',
@@ -165,7 +185,7 @@ def main():
     args = parser.parse_args()
 
     contents = args.filename.read()
-    url = geojsonio_url(contents, args.domain)
+    url = make_url(contents, args.domain)
     if args.do_print:
         print(url)
     else:
