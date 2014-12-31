@@ -13,7 +13,25 @@ import github3
 MAX_URL_LEN = 150e3  # Size threshold above which a gist is created
 DEFAULT_DOMAIN = 'http://geojson.io/'
 
+
 def display(contents, domain=DEFAULT_DOMAIN, force_gist=False):
+    """
+    Open a web browser pointing to geojson.io with the specified content.
+
+    If the content is large, an anonymous gist will be created on github and
+    the URL will instruct geojson.io to download the gist data and then
+    display. If the content is small, this step is not needed as the data can
+    be included in the URL
+
+    Parameters
+    ----------
+    content - (see make_geojson)
+    domain - string, default http://geojson.io
+    force_gist - bool, default False
+        Create an anonymous gist on Github regardless of the size of the
+        contents
+
+    """
     url = make_url(contents, domain, force_gist)
     webbrowser.open(url)
     return url
@@ -23,36 +41,43 @@ to_geojsonio = display
 
 def embed(contents='', width='100%', height=512, *args, **kwargs):
     """
-    Embed geojson.io in an iframe in Jupyter/IPython notebook. 
+    Embed geojson.io in an iframe in Jupyter/IPython notebook.
 
     Parameters
     ----------
     contents - see make_url()
     width - string, default '100%' - width of the iframe
     height - string / int, default 512 - height of the iframe
+    kwargs - additional arguments are passed to `make_url()`
 
     """
     from IPython.display import HTML
-    
+
     url = make_url(contents, *args, **kwargs)
     html = '<iframe src={url} width={width} height={height}></iframe>'.format(
-            url=url, width=width, height=height)
+        url=url, width=width, height=height)
     return HTML(html)
 
 
 def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False,
              size_for_gist=MAX_URL_LEN):
     """
-    Returns the URL to open given the domain and contents
+    Returns the URL to open given the domain and contents.
 
-    The input contents may be:
-    * string - assumed to be GeoJSON
-    * an object that implements __geo_interface__
-        A FeatureCollection will be constructed with one feature,
-        the object.
-    * a sequence of objects that each implement __geo_interface__
-        A FeatureCollection will be constructed with the objects
-        as the features
+    If the file contents are large, an anonymous gist will be created.
+
+    Parameters
+    ----------
+    contents
+        * string - assumed to be GeoJSON
+        * an object that implements __geo_interface__
+            A FeatureCollection will be constructed with one feature,
+            the object.
+        * a sequence of objects that each implement __geo_interface__
+            A FeatureCollection will be constructed with the objects
+            as the features
+    domain - string, default http://geojson.io
+    force_gist - force gist creation regardless of file size.
 
     For more information about __geo_interface__ see:
     https://gist.github.com/sgillies/2217756
@@ -60,17 +85,17 @@ def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False,
     If the contents are large, then a gist will be created.
 
     """
-    contents = parse_contents(contents)
+    contents = make_geojson(contents)
     if len(contents) <= size_for_gist and not force_gist:
         url = data_url(contents, domain)
     else:
-        gist = make_gist(contents)
+        gist = _make_gist(contents)
         url = gist_url(gist.id, domain)
 
     return url
 
 
-def parse_contents(contents):
+def make_geojson(contents):
     """
     Return a GeoJSON string from a variety of inputs.
     See the documentation for make_url for the possible contents
@@ -121,12 +146,21 @@ def _geo_to_feature(ob):
 
 
 def data_url(contents, domain=DEFAULT_DOMAIN):
+    """
+    Return the URL for embedding the GeoJSON data in the URL hash
+
+    Parameters
+    ----------
+    contents - string of GeoJSON
+    domain - string, default http://geojson.io
+
+    """
     url = (domain + '#data=data:application/json,' +
            urllib.quote(contents))
     return url
 
 
-def make_gist(contents, description='', filename='data.geojson'):
+def _make_gist(contents, description='', filename='data.geojson'):
     """
     Create and return an anonymous gist with a single file and specified
     contents
@@ -140,6 +174,15 @@ def make_gist(contents, description='', filename='data.geojson'):
 
 
 def gist_url(gist_id, domain=DEFAULT_DOMAIN):
+    """
+    Return the URL for loading GeoJSON data from a gist
+
+    Parameters
+    ----------
+    contents - string, gist id
+    domain - string, default http://geojson.io
+
+    """
     url = (domain + '#id=gist:/{}'.format(gist_id))
     return url
 
