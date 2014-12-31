@@ -28,8 +28,15 @@ setup(
         'Programming Language :: Python :: 2.7',
     ),
     install_requires=[
-        "github3.py>=0.7.0",
+        "github3.py==0.9.3",
+        "six==1.8.0",
     ],
+    extras_require={
+        'test': [
+            "pytest==2.6.4",
+            "mock==1.0.1",
+        ]
+    },
     entry_points={
       'console_scripts':
         ['geojsonio = geojsonio:main']

@@ -1,4 +1,6 @@
-from geojsonio import (
+from __future__ import absolute_import
+
+from .geojsonio import (
     main,
     to_geojsonio,
     display,

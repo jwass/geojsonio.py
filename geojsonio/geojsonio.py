@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 import argparse
 import json
 import sys
-import urllib
 import webbrowser
 
 import github3
+import six
+from six.moves import urllib
 
 MAX_URL_LEN = 150e3  # Size threshold above which a gist is created
 DEFAULT_DOMAIN = 'http://geojson.io/'
@@ -106,7 +107,7 @@ def make_geojson(contents):
     GeoJSON string
 
     """
-    if isinstance(contents, basestring):
+    if isinstance(contents, six.string_types):
         return contents
 
     if hasattr(contents, '__geo_interface__'):
@@ -120,7 +121,7 @@ def make_geojson(contents):
         features = []
         for i, f in enumerate(feature_iter):
             if not hasattr(f, '__geo_interface__'):
-                raise ValueError('Unknown type at index {}'.format(i))
+                raise ValueError('Unknown type at index {0}'.format(i))
             features.append(_geo_to_feature(f))
 
     data = {'type': 'FeatureCollection', 'features': features}
@@ -156,7 +157,7 @@ def data_url(contents, domain=DEFAULT_DOMAIN):
 
     """
     url = (domain + '#data=data:application/json,' +
-           urllib.quote(contents))
+           urllib.parse.quote(contents))
     return url
 
 
@@ -183,7 +184,7 @@ def gist_url(gist_id, domain=DEFAULT_DOMAIN):
     domain - string, default http://geojson.io
 
     """
-    url = (domain + '#id=gist:/{}'.format(gist_id))
+    url = (domain + '#id=gist:/{0}'.format(gist_id))
     return url
 
 

@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 import json
+from six.moves import urllib
 
-import mock
-
-# Import the module here even not all of this is exposed
 import geojsonio
 import github3
+
+import mock
 import pytest
 
 
@@ -95,9 +95,15 @@ def test_parse_fail_list_non_feature(features):
 
 
 def test_data_url(features):
-    expected = """http://geojson.io/#data=data:application/json,%7B%22geometry%22%3A%20%7B%22type%22%3A%20%22Point%22%2C%20%22coordinates%22%3A%20%5B1.0%2C%202.0%5D%7D%2C%20%22type%22%3A%20%22Feature%22%2C%20%22properties%22%3A%20%7B%22prop1%22%3A%20%22value1%22%2C%20%22prop2%22%3A%202.0%7D%7D"""
+    feature = features['features'][0]
+    header = "http://geojson.io/#data=data:application/json,"
+    length = len(header)
 
-    assert expected == geojsonio.data_url(json.dumps(features['features'][0]))
+    result = geojsonio.data_url(json.dumps(feature))
+    payload = json.loads(urllib.parse.unquote(result[length:]))
+
+    assert result[:length] == header
+    assert payload == feature
 
 
 def test_gist_url():
