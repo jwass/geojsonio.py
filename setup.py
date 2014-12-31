@@ -1,23 +1,23 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from codecs import open as codecs_open
+from setuptools import setup, find_packages
 
-packages = [
-    'geojsonio',
-]
+
+# Get the long description from the relevant file
+with codecs_open('README.rst', encoding='utf-8') as f:
+    long_description = f.read()
+
 
 setup(
     name='geojsonio',
     version='0.0.1',
     description='geojsonio CLI - Python.',
-    # long_description=readme + '\n\n' + history,
+    long_description=long_description,
     author='Jacob Wasserman',
     author_email='jwasserman@gmail.com',
-    packages=packages,
-    package_data={'': ['LICENSE',]},
+    url='https://github.com/jwass/geojsonio.py',
+    packages=find_packages(exclude=['ez_setup', 'tests']),
     include_package_data=True,
     license='BSD',
     zip_safe=False,
