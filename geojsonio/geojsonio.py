@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import argparse
 import json
@@ -39,7 +40,8 @@ def embed(contents='', width='100%', height=512, *args, **kwargs):
     return HTML(html)
 
 
-def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False):
+def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False,
+             size_for_gist=MAX_URL_LEN):
     """
     Returns the URL to open given the domain and contents
 
@@ -59,8 +61,11 @@ def make_url(contents, domain=DEFAULT_DOMAIN, force_gist=False):
 
     """
     contents = parse_contents(contents)
-    factory = get_url_factory(contents, force_gist, size_for_gist=MAX_URL_LEN)
-    url = factory(contents, domain)
+    if len(contents) <= size_for_gist and not force_gist:
+        url = data_url(contents, domain)
+    else:
+        gist = make_gist(contents)
+        url = gist_url(gist.id, domain)
 
     return url
 
@@ -115,32 +120,9 @@ def _geo_to_feature(ob):
                 'geometry': mapping}
 
 
-def get_url_factory(contents, force_gist=False, size_for_gist=MAX_URL_LEN):
-    """
-    Return a function that will generate the geojson.io URL
-
-    Factory functions take the domain and contents and return the appropriate
-    URL that geojson.io knows how to handle. The automatic switching logic to
-    choose which factory is used belongs here.
-
-    """
-    if len(contents) <= size_for_gist and not force_gist:
-        func = get_data_url
-    else:
-        func = make_gist_and_url
-
-    return func
-
-
-def get_data_url(contents, domain=DEFAULT_DOMAIN):
+def data_url(contents, domain=DEFAULT_DOMAIN):
     url = (domain + '#data=data:application/json,' +
            urllib.quote(contents))
-    return url
-
-
-def make_gist_and_url(contents, domain=DEFAULT_DOMAIN):
-    gist = make_gist(contents)
-    url = get_gist_url(gist.id, domain)
     return url
 
 
@@ -157,7 +139,7 @@ def make_gist(contents, description='', filename='data.geojson'):
     return gist
 
 
-def get_gist_url(gist_id, domain=DEFAULT_DOMAIN):
+def gist_url(gist_id, domain=DEFAULT_DOMAIN):
     url = (domain + '#id=gist:/{}'.format(gist_id))
     return url
 
