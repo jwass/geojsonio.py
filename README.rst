@@ -1,10 +1,14 @@
+============
 geojsonio.py
 ============
 
-Open GeoJSON data on [geojson.io](http://geojson.io).
-This is a python port of [geojsonio-cli](https://github.com/mapbox/geojsonio-cli).
+Open GeoJSON data on `geojson.io <http://geojson.io>`_.
+This is a python port of `geojsonio-cli
+<https://github.com/mapbox/geojsonio-cli>`_.
 
 Send data to geojson.io and open a browser within python
+
+..code-block:: python
 
     from geojsonio import display
   
@@ -14,7 +18,7 @@ Send data to geojson.io and open a browser within python
     display(contents)
     
 To easily embed geojson.io in an iframe in a Jupyter/IPython notebook, use
-the `embed()` method
+the ``embed()`` method
 
     embed(contents)
 
