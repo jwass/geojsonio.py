@@ -67,3 +67,12 @@ Options:
 
     --print prints the url rather than opening it
     --domain="http://custominstancedomain.com/"
+
+Installation
+------------
+Install with ``pip``
+
+::
+
+    $ pip install geojsonio
+
