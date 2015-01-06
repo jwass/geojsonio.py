@@ -76,4 +76,4 @@ Install with ``pip``
 
     $ pip install geojsonio
 
-That's all folks!
+
