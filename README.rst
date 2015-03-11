@@ -21,6 +21,18 @@ Send data to geojson.io and open a browser within python
     with open('map.geojson') as f:
         contents = f.read()
         display(contents)
+        
+Data
+----
+There are two methods by which ``geojsonio.py`` gets geojson.io to render the data:
+
+- Embedding the GeoJSON contents in the geojson.io URL directly
+- Creating an anonymous Github gist and embedding the gist id in the geojson.io URL.
+
+``geojsonio.py`` automatically determines which method is used based on the length of the GeoJSON contents.
+If the contents are small enough, they will be embedded in the URL. Otherwise ``geojsonio.py`` creates an anonymous
+Gist on Github with the GeoJSON contents. Note: when an anonymous gist is created, the data is uploaded to Github
+and a unique gist ID is created. If anyone else is able to obtain the gist ID, they will be able to see your data.
     
 Goes Great With GeoPandas
 -------------------------
