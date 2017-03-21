@@ -11,7 +11,7 @@ with codecs_open('README.rst', encoding='utf-8') as f:
 
 setup(
     name='geojsonio',
-    version='0.0.2',
+    version='0.0.3',
     description='geojsonio CLI - Python.',
     long_description=long_description,
     author='Jacob Wasserman',
@@ -28,13 +28,13 @@ setup(
         'Programming Language :: Python :: 2.7',
     ),
     install_requires=[
-        "github3.py==0.9.3",
-        "six==1.8.0",
+        "github3.py",
+        "six",
     ],
     extras_require={
         'test': [
-            "pytest==2.6.4",
-            "mock==1.0.1",
+            "pytest",
+            "mock",
         ]
     },
     entry_points={
