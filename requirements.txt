@@ -1,1 +1,1 @@
-github3.py>=0.7.0
+github3.py==0.7.0
