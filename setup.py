@@ -11,7 +11,7 @@ with codecs_open('README.rst', encoding='utf-8') as f:
 
 setup(
     name='geojsonio',
-    version='0.0.3',
+    version='0.0.4',
     description='geojsonio CLI - Python.',
     long_description=long_description,
     author='Jacob Wasserman',
